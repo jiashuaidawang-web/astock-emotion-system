@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #0B0E11;
+  color: #EAECEF;
+}
+
+html,
+body,
+#app {
+  min-height: 100%;
+  margin: 0;
+  background: #0B0E11;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.el-button,
+.el-input__wrapper,
+.el-select__wrapper,
+.el-date-editor.el-input__wrapper {
+  border-radius: 8px;
+}
+
+.el-table {
+  --el-table-bg-color: #181E25;
+  --el-table-tr-bg-color: #181E25;
+  --el-table-header-bg-color: #0F141C;
+  --el-table-border-color: rgba(255,255,255,0.05);
+  --el-table-text-color: #EAECEF;
+  --el-table-header-text-color: #848E9C;
+}
+
+.quant-panel {
+  background: #181E25;
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 12px;
+}
+
+.quant-grid {
+  display: grid;
+  gap: 0.375rem;
+}
+
+.text-up {
+  color: #0ECB81;
+}
+
+.text-down {
+  color: #F6465D;
+}
+
+.text-neutral {
+  color: #848E9C;
+}

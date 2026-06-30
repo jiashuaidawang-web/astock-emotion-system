@@ -1,0 +1,49 @@
+-- 第七步第十段：SimilarityMatchEngine 输出字段契约
+-- 本文件用于说明引擎写入字段。若你已有正式DDL，请核对字段是否已存在。
+
+-- historical_similarity_match 建议字段：
+-- trade_date
+-- market_scope
+-- task_id
+-- rule_version_id
+-- match_type
+-- sample_id
+-- historical_trade_date
+-- historical_stage
+-- market_environment_similarity_score
+-- emotion_cycle_similarity_score
+-- theme_leader_similarity_score
+-- total_similarity_score
+-- dimension_score_json
+-- reference_text
+-- risk_text
+-- created_at
+
+-- historical_similarity_factor_detail 建议字段：
+-- trade_date
+-- market_scope
+-- task_id
+-- rule_version_id
+-- match_type
+-- sample_id
+-- historical_trade_date
+-- dimension_code
+-- dimension_name
+-- dimension_group_code
+-- dimension_weight
+-- current_value
+-- historical_value
+-- dimension_similarity_score
+-- evidence_json
+-- created_at
+
+-- 防未来函数红线：
+-- SimilarityFeatureVectorExtractor.historical() 只允许读取历史样本T日当时可见字段。
+-- 禁止读取：
+-- future_1d_return
+-- future_3d_return
+-- future_5d_return
+-- future_10d_return
+-- max_drawdown
+-- following_return
+-- 这些字段只能在页面展示历史后续表现或回测统计时读取。

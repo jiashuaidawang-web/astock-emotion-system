@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Annotation profile for astock-emotion-system" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$USER_HOME$/environment/maven/repository1/org/projectlombok/lombok/1.18.34/lombok-1.18.34.jar" />
+        </processorPath>
+        <module name="module-leader" />
+        <module name="module-sample" />
+        <module name="module-sector" />
+        <module name="module-review" />
+        <module name="module-market" />
+        <module name="module-similarity" />
+        <module name="module-agent-audit" />
+        <module name="module-backtest" />
+        <module name="module-mainline" />
+        <module name="astock-infrastructure" />
+        <module name="module-risk" />
+        <module name="module-rule" />
+        <module name="module-emotion" />
+        <module name="module-pattern" />
+        <module name="astock-app" />
+      </profile>
+      <profile name="Annotation profile for astock-api" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$USER_HOME$/environment/maven/repository1/org/projectlombok/lombok/1.18.34/lombok-1.18.34.jar" />
+          <entry name="$USER_HOME$/environment/maven/repository1/org/projectlombok/lombok/1.18.34/lombok-1.18.34.jar" />
+        </processorPath>
+        <module name="astock-api" />
+      </profile>
+      <profile name="Annotation profile for astock-common" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$USER_HOME$/environment/maven/repository1/org/projectlombok/lombok/1.18.34/lombok-1.18.34.jar" />
+          <entry name="$USER_HOME$/environment/maven/repository1/org/projectlombok/lombok/1.18.34/lombok-1.18.34.jar" />
+        </processorPath>
+        <module name="astock-common" />
+      </profile>
+    </annotationProcessing>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="astock-api" options="-parameters" />
+      <module name="astock-app" options="-parameters" />
+      <module name="astock-common" options="-parameters" />
+      <module name="astock-infrastructure" options="-parameters" />
+      <module name="module-agent-audit" options="-parameters" />
+      <module name="module-backtest" options="-parameters" />
+      <module name="module-emotion" options="-parameters" />
+      <module name="module-leader" options="-parameters" />
+      <module name="module-mainline" options="-parameters" />
+      <module name="module-market" options="-parameters" />
+      <module name="module-pattern" options="-parameters" />
+      <module name="module-review" options="-parameters" />
+      <module name="module-risk" options="-parameters" />
+      <module name="module-rule" options="-parameters" />
+      <module name="module-sample" options="-parameters" />
+      <module name="module-sector" options="-parameters" />
+      <module name="module-similarity" options="-parameters" />
+    </option>
+  </component>
+</project>

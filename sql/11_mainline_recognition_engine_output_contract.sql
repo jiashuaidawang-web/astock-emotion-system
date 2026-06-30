@@ -1,0 +1,76 @@
+-- 第七步第十一段：MainlineRecognitionEngine 输出字段契约
+-- 本文件用于说明引擎写入字段。若你已有正式DDL，请核对字段是否已存在。
+
+-- theme_strength_snapshot 建议字段：
+-- trade_date
+-- market_scope
+-- task_id
+-- rule_version_id
+-- theme_code
+-- theme_name
+-- theme_type
+-- theme_strength_score
+-- strength_score
+-- rank_no
+-- limit_up_cluster_score
+-- turnover_concentration_score
+-- continuity_score
+-- ladder_integrity_score
+-- leader_drive_score
+-- emotion_match_score
+-- evidence_json
+-- risk_json
+-- created_at
+
+-- mainline_daily_snapshot 建议字段：
+-- trade_date
+-- market_scope
+-- task_id
+-- rule_version_id
+-- mainline_id
+-- mainline_code
+-- mainline_name
+-- theme_code
+-- theme_name
+-- mainline_status
+-- lifecycle_stage
+-- theme_role
+-- mainline_strength_score
+-- rank_no
+-- limit_up_cluster_score
+-- turnover_concentration_score
+-- continuity_score
+-- ladder_integrity_score
+-- leader_drive_score
+-- emotion_match_score
+-- evidence_json
+-- risk_json
+-- created_at
+
+-- mainline_switch_snapshot 建议字段：
+-- trade_date
+-- market_scope
+-- task_id
+-- rule_version_id
+-- old_mainline_code
+-- old_mainline_name
+-- new_mainline_code
+-- new_mainline_name
+-- switch_status
+-- switch_score
+-- evidence_json
+-- risk_json
+-- created_at
+
+-- 输入关键表：
+-- theme_daily_snapshot
+-- emotion_stage_snapshot
+
+-- 增强上下文表：
+-- sector_strength_snapshot
+-- leader_daily_snapshot
+-- 过去N日 mainline_daily_snapshot
+
+-- 红线：
+-- mainline_strength_score 不允许等同 pct_change 排名。
+-- mainline_strength_score 不允许等同 limit_up_count 排名。

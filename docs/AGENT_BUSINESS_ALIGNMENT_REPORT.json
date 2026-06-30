@@ -1,0 +1,69 @@
+{
+  "agent": "BusinessAlignmentAgent",
+  "status": "PASSED",
+  "summary": {
+    "mysql_table_count": 42,
+    "clickhouse_table_count": 39,
+    "wide_java_sql_ref_count": 81,
+    "mapper_direct_ref_count": 6,
+    "frontend_api_count": 16,
+    "backend_method_mapping_count": 28,
+    "route_page_count": 15,
+    "page_file_count": 15
+  },
+  "checks": [
+    {
+      "name": "MySQL初始化表数量>=42",
+      "passed": true,
+      "detail": {
+        "mysql_table_count": 42
+      }
+    },
+    {
+      "name": "ClickHouse初始化表数量>=39",
+      "passed": true,
+      "detail": {
+        "clickhouse_table_count": 39
+      }
+    },
+    {
+      "name": "Java宽口径SQL引用表均在DDL",
+      "passed": true,
+      "detail": {
+        "wide_java_sql_ref_count": 81,
+        "mapper_direct_ref_count": 6,
+        "missing_tables": []
+      }
+    },
+    {
+      "name": "前端API均有后端方法级映射",
+      "passed": true,
+      "detail": {
+        "frontend_api_count": 16,
+        "backend_method_mapping_count": 28,
+        "missing_backend_paths": []
+      }
+    },
+    {
+      "name": "路由页面文件存在",
+      "passed": true,
+      "detail": {
+        "route_page_count": 15
+      }
+    },
+    {
+      "name": "页面文件数量为15",
+      "passed": true,
+      "detail": {
+        "page_file_count": 15
+      }
+    },
+    {
+      "name": "页面主展示不依赖JsonViewer",
+      "passed": true,
+      "detail": {
+        "json_pages": []
+      }
+    }
+  ]
+}

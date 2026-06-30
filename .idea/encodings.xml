@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/astock-api/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/astock-api/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/astock-app/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/astock-app/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/astock-common/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/astock-common/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/astock-infrastructure/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/astock-infrastructure/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/astock-modules/module-agent-audit/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/astock-modules/module-agent-audit/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/astock-modules/module-backtest/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/astock-modules/module-backtest/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/astock-modules/module-emotion/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/astock-modules/module-emotion/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/astock-modules/module-leader/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/astock-modules/module-leader/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/astock-modules/module-mainline/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/astock-modules/module-mainline/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/astock-modules/module-market/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/astock-modules/module-market/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/astock-modules/module-pattern/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/astock-modules/module-pattern/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/astock-modules/module-review/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/astock-modules/module-review/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/astock-modules/module-risk/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/astock-modules/module-risk/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/astock-modules/module-rule/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/astock-modules/module-rule/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/astock-modules/module-sample/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/astock-modules/module-sample/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/astock-modules/module-sector/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/astock-modules/module-sector/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/astock-modules/module-similarity/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/astock-modules/module-similarity/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/astock-modules/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/astock-modules/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/resources" charset="UTF-8" />
+  </component>
+</project>

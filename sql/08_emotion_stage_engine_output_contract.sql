@@ -1,0 +1,49 @@
+-- 第七步第八段：EmotionStageRecognitionEngine 输出字段契约
+-- 注意：本文件用于说明引擎写入字段。若你已有正式DDL，请核对字段是否已存在。
+
+-- emotion_stage_score_detail 需要支持字段：
+-- trade_date
+-- market_scope
+-- task_id
+-- rule_version_id
+-- stage_code
+-- stage_name
+-- stage_score
+-- rank_no
+-- factor_percentile_match_score
+-- historical_sample_similarity_score
+-- stage_path_match_score
+-- following_validation_score
+-- manual_sample_correction_score
+-- evidence_json
+-- risk_json
+-- created_at
+
+-- emotion_stage_snapshot 需要支持字段：
+-- trade_date
+-- market_scope
+-- task_id
+-- rule_version_id
+-- primary_stage
+-- primary_stage_name
+-- stage_confidence
+-- second_candidate_stage
+-- second_candidate_stage_name
+-- third_candidate_stage
+-- third_candidate_stage_name
+-- evidence_json
+-- risk_json
+-- data_complete
+-- created_at
+
+-- stage_transition_snapshot 需要支持字段：
+-- trade_date
+-- market_scope
+-- task_id
+-- rule_version_id
+-- from_stage
+-- to_stage
+-- transition_probability
+-- transition_score
+-- evidence_json
+-- created_at

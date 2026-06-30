@@ -1,0 +1,108 @@
+-- 第七步第十二段：LeaderRecognitionEngine 输出字段契约
+-- 本文件用于说明引擎写入字段。若你已有正式DDL，请核对字段是否已存在。
+
+-- leader_daily_snapshot 建议字段：
+-- trade_date
+-- market_scope
+-- task_id
+-- rule_version_id
+-- stock_code
+-- stock_name
+-- sector_code
+-- sector_name
+-- mainline_code
+-- mainline_name
+-- leader_type
+-- leader_status
+-- leader_score
+-- rank_no
+-- recognition_score
+-- mainline_relation_score
+-- drive_score
+-- strength_score
+-- support_score
+-- continuity_score
+-- risk_feedback_score
+-- negative_feedback_score
+-- board_height
+-- limit_up
+-- broken_board
+-- pct_change
+-- turnover_amount
+-- evidence_json
+-- risk_json
+-- created_at
+
+-- leader_ladder_snapshot 建议字段：
+-- trade_date
+-- market_scope
+-- task_id
+-- rule_version_id
+-- board_height
+-- stock_count
+-- top_stock_code
+-- top_stock_name
+-- top_leader_score
+-- leader_type
+-- evidence_json
+-- risk_json
+-- created_at
+
+-- leader_drive_snapshot 建议字段：
+-- trade_date
+-- market_scope
+-- task_id
+-- rule_version_id
+-- stock_code
+-- stock_name
+-- sector_drive_score
+-- mainline_drive_score
+-- emotion_drive_score
+-- fund_drive_score
+-- leader_drive_score
+-- evidence_json
+-- risk_json
+-- created_at
+
+-- leader_negative_feedback 建议字段：
+-- trade_date
+-- market_scope
+-- task_id
+-- rule_version_id
+-- stock_code
+-- stock_name
+-- leader_type
+-- negative_feedback_score
+-- broken_board
+-- limit_down
+-- impact_mainline
+-- impact_emotion_cycle
+-- evidence_json
+-- risk_json
+-- created_at
+
+-- leader_score公式：
+-- 辨识度评分 * 20%
+-- + 主线关联评分 * 20%
+-- + 带动性评分 * 20%
+-- + 强度评分 * 15%
+-- + 承接评分 * 10%
+-- + 持续性评分 * 10%
+-- + 风险反馈评分 * 5%
+
+-- leader_drive_score公式：
+-- 板块带动 * 35%
+-- + 主线带动 * 30%
+-- + 情绪带动 * 20%
+-- + 资金带动 * 15%
+
+-- negative_feedback_score公式：
+-- 断板跌幅 * 25%
+-- + 断板后板块跌幅 * 25%
+-- + 后排亏钱效应 * 20%
+-- + 高标晋级率下降 * 15%
+-- + 情绪温度下降 * 15%
+
+-- 红线：
+-- 市场总龙头候选由综合 leader_score 排序产生。
+-- board_height 只是辨识度和梯队维度之一，不允许“最高板 = 市场总龙头”。

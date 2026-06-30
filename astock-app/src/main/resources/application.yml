@@ -1,0 +1,27 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: astock-emotion-system
+  threads:
+    virtual:
+      enabled: true
+  datasource:
+    mysql:
+      url: jdbc:mysql://127.0.0.1:3306/astock_emotion_system?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+      username: root
+      password: root
+      driver-class-name: com.mysql.cj.jdbc.Driver
+    clickhouse:
+      url: jdbc:clickhouse://127.0.0.1:8123/astock_emotion_ck
+      username: default
+      password:
+      driver-class-name: com.clickhouse.jdbc.ClickHouseDriver
+
+astock:
+  redline:
+    forbid-trading-instruction: true
+    forbid-mock-data: true
+    require-rule-version: true
+    require-data-lineage: true

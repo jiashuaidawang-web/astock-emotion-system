@@ -1,0 +1,81 @@
+-- 第七步第十四段：RiskControlEngine 输出字段契约
+-- 本文件用于说明引擎写入字段。若你已有正式DDL，请核对字段是否已存在。
+
+-- risk_signal_snapshot 建议字段：
+-- trade_date
+-- market_scope
+-- task_id
+-- rule_version_id
+-- risk_code
+-- risk_name
+-- risk_source
+-- risk_score
+-- risk_level
+-- signal_level
+-- risk_action
+-- one_vote_veto
+-- evidence_json
+-- risk_json
+-- created_at
+
+-- risk_signal_detail 建议字段：
+-- trade_date
+-- market_scope
+-- task_id
+-- rule_version_id
+-- risk_code
+-- risk_name
+-- risk_source
+-- signal_level
+-- risk_level
+-- risk_score
+-- risk_action
+-- one_vote_veto
+-- risk_text
+-- evidence_json
+-- risk_json
+-- created_at
+
+-- pattern_risk_veto_snapshot 二次覆盖建议字段：
+-- trade_date
+-- market_scope
+-- task_id
+-- rule_version_id
+-- pattern_code
+-- pattern_name
+-- stock_code
+-- stock_name
+-- leader_type
+-- condition_status
+-- condition_score
+-- risk_veto
+-- risk_veto_reason
+-- invalidated
+-- invalidated_reason
+-- risk_action
+-- evidence_json
+-- risk_json
+-- created_at
+
+-- risk_score公式：
+-- 情绪周期风险 * 20%
+-- + 亏钱效应风险 * 20%
+-- + 涨跌停生态风险 * 20%
+-- + 龙头负反馈风险 * 20%
+-- + 主线衰退风险 * 10%
+-- + 指数资金风险 * 5%
+-- + 数据完整性风险 * 5%
+
+-- 风险动作：
+-- NORMAL
+-- CAUTION
+-- REQUIRE_CONFIRMATION
+-- PATTERN_INVALIDATED
+-- RISK_VETO
+-- DATA_BLOCK
+
+-- 风控红线：
+-- RiskControlEngine 是 PatternConditionEngine 的上级保护层。
+-- 当 total risk_action 为 RISK_VETO / PATTERN_INVALIDATED / DATA_BLOCK 时，
+-- 必须二次覆盖 pattern_risk_veto_snapshot。
+-- 风控输出不得包含交易建议。

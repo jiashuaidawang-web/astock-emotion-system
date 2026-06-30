@@ -1,0 +1,79 @@
+-- 第七步第十六段：AgentAuditExecutor 输出字段契约
+-- 本文件用于说明引擎写入字段。若你已有正式DDL，请核对字段是否已存在。
+
+-- agent_audit_code_scan_detail 建议字段：
+-- trade_date
+-- market_scope
+-- audit_task_id
+-- task_id
+-- rule_version_id
+-- issue_code
+-- issue_name
+-- issue_level
+-- issue_type
+-- module_name
+-- file_path
+-- line_no
+-- release_blocker
+-- evidence_json
+-- created_at
+
+-- agent_audit_data_lineage_detail 建议字段：
+-- trade_date
+-- market_scope
+-- audit_task_id
+-- task_id
+-- rule_version_id
+-- page_code
+-- vo_class_name
+-- field_name
+-- source_table
+-- source_column
+-- lineage_status
+-- issue_level
+-- evidence_json
+-- created_at
+
+-- agent_audit_rule_hit_detail 建议字段：
+-- trade_date
+-- market_scope
+-- audit_task_id
+-- task_id
+-- rule_version_id
+-- rule_code
+-- rule_name
+-- hit_status
+-- hit_count
+-- blocker_count
+-- evidence_json
+-- created_at
+
+-- agent_audit_release_gate_detail 建议字段：
+-- trade_date
+-- market_scope
+-- audit_task_id
+-- task_id
+-- rule_version_id
+-- gate_code
+-- gate_name
+-- gate_status
+-- passed
+-- issue_count
+-- blocker_count
+-- evidence_json
+-- created_at
+
+-- 当前审计规则：
+-- MOCK_DETECTED
+-- TRADING_ADVICE_WORD_DETECTED
+-- FUTURE_FUNCTION_RISK
+-- CONTROLLER_ALGORITHM_RISK
+-- ENGINE_EMPTY_COMPUTE
+-- FIELD_LINEAGE_AUDIT
+
+-- 当前发布闸门：
+-- GATE_NO_MOCK
+-- GATE_NO_TRADING_ADVICE
+-- GATE_NO_FUTURE_LEAKAGE
+-- GATE_NO_EMPTY_ENGINE
+-- GATE_FIELD_LINEAGE

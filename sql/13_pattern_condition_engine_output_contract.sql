@@ -1,0 +1,86 @@
+-- 第七步第十三段：PatternConditionEngine 输出字段契约
+-- 本文件用于说明引擎写入字段。若你已有正式DDL，请核对字段是否已存在。
+
+-- buy_pattern_signal_snapshot 建议字段：
+-- trade_date
+-- market_scope
+-- task_id
+-- rule_version_id
+-- pattern_code
+-- pattern_name
+-- stock_code
+-- stock_name
+-- watch_object_type
+-- leader_type
+-- leader_status
+-- mainline_code
+-- mainline_name
+-- emotion_stage
+-- condition_status
+-- condition_score
+-- pattern_condition_score
+-- cycle_admission_score
+-- mainline_valid_score
+-- leader_position_score
+-- trigger_score
+-- backtest_support_score
+-- manual_correction_score
+-- risk_veto
+-- risk_veto_reason
+-- invalidated
+-- invalidated_reason
+-- allow_condition_met_display
+-- signal_text
+-- evidence_json
+-- risk_json
+-- created_at
+
+-- pattern_risk_veto_snapshot 建议字段：
+-- trade_date
+-- market_scope
+-- task_id
+-- rule_version_id
+-- pattern_code
+-- pattern_name
+-- stock_code
+-- stock_name
+-- leader_type
+-- condition_status
+-- condition_score
+-- risk_veto
+-- risk_veto_reason
+-- invalidated
+-- invalidated_reason
+-- risk_action
+-- evidence_json
+-- risk_json
+-- created_at
+
+-- pattern_condition_score公式：
+-- 周期准入分 * 25%
+-- + 主线有效分 * 20%
+-- + 龙头地位分 * 20%
+-- + 模式触发分 * 20%
+-- + 历史回测支持分 * 10%
+-- + 人工确认修正 * 5%
+
+-- 观察对象池允许：
+-- MARKET_LEADER
+-- MAINLINE_LEADER
+-- TREND_LEADER
+-- MIDDLE_ARMY
+-- COMPENSATION_LEADER
+-- SWITCH_LEADER
+
+-- 默认排除：
+-- FOLLOWER
+-- 无主线普通强势股
+-- 数据不完整对象
+-- 被风险停止观察对象
+
+-- 状态优先级：
+-- RISK_VETO > INVALIDATED > NOT_APPLICABLE > CONDITION_MET > OBSERVING > WEAK_MATCH > WAITING
+
+-- 合规红线：
+-- 输出只能是条件状态。
+-- 不允许输出买入、卖出、持有、推荐、目标价。

@@ -1,0 +1,88 @@
+-- 第七步第十五段：BacktestExecutor 输出字段契约
+-- 本文件用于说明引擎写入字段。若你已有正式DDL，请核对字段是否已存在。
+
+-- backtest_signal_detail 建议字段：
+-- trade_date
+-- market_scope
+-- task_id
+-- rule_version_id
+-- sample_id
+-- sample_date
+-- stage_code
+-- pattern_code
+-- stock_code
+-- stock_name
+-- mainline_code
+-- mainline_name
+-- signal_score
+-- risk_score
+-- risk_action
+-- signal_effective
+-- risk_vetoed
+-- replay_status
+-- replay_return
+-- replay_drawdown
+-- future_1d_return
+-- future_3d_return
+-- future_5d_return
+-- future_10d_return
+-- max_drawdown
+-- evidence_json
+-- risk_json
+-- created_at
+
+-- backtest_performance_detail 建议字段：
+-- trade_date
+-- market_scope
+-- task_id
+-- rule_version_id
+-- layer_code
+-- layer_name
+-- metric_name
+-- metric_value
+-- sample_count
+-- evidence_json
+-- created_at
+
+-- backtest_layer_stat 建议字段：
+-- trade_date
+-- market_scope
+-- task_id
+-- rule_version_id
+-- layer_code
+-- layer_name
+-- sample_count
+-- effective_signal_count
+-- risk_veto_count
+-- win_rate
+-- avg_return
+-- avg_drawdown
+-- profit_loss_ratio
+-- evidence_json
+-- created_at
+
+-- backtest_failure_case 建议字段：
+-- trade_date
+-- market_scope
+-- task_id
+-- rule_version_id
+-- sample_id
+-- sample_date
+-- pattern_code
+-- stock_code
+-- stock_name
+-- failure_type
+-- failure_reason
+-- replay_status
+-- replay_return
+-- replay_drawdown
+-- future_3d_return
+-- max_drawdown
+-- evidence_json
+-- risk_json
+-- created_at
+
+-- future字段红线：
+-- future_1d_return / future_3d_return / future_5d_return / future_10d_return / max_drawdown
+-- 只能在历史样本 sample_date < backtest_end_date 的回测窗口读取。
+-- 禁止在T日信号生成、相似度匹配、模式条件判定中读取。
