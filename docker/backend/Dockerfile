@@ -8,4 +8,4 @@ WORKDIR /app
 ENV TZ=Asia/Shanghai
 COPY --from=builder /workspace/astock-app/target/*.jar /app/astock-app.jar
 EXPOSE 8080
-ENTRYPOINT ["sh", "-c", "java ${JAVA_OPTS} -jar /app/astock-app.jar --spring.profiles.active=${SPRING_PROFILES_ACTIVE:-local}"]
+ENTRYPOINT ["sh", "-c", "java -jar /app/astock-app.jar --spring.profiles.active=${SPRING_PROFILES_ACTIVE:-local}"]

@@ -7,7 +7,7 @@ services:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-astock_root}
       MYSQL_DATABASE: ${MYSQL_DATABASE:-astock_business}
       MYSQL_USER: ${MYSQL_USER:-astock}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-astock_pwd}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-pamirs@123}
       TZ: Asia/Shanghai
     ports:
       - "${MYSQL_PORT:-3306}:3306"
@@ -32,7 +32,7 @@ services:
     environment:
       CLICKHOUSE_DB: ${CLICKHOUSE_DATABASE:-astock_analysis}
       CLICKHOUSE_USER: ${CLICKHOUSE_USER:-default}
-      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-pamirs@123}
       TZ: Asia/Shanghai
     ports:
       - "${CLICKHOUSE_HTTP_PORT:-8123}:8123"
@@ -60,17 +60,17 @@ services:
         condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-local}
-      JAVA_OPTS: ${JAVA_OPTS:-"-Xms1024m -Xmx2048m -XX:+UseG1GC"}
+      JAVA_TOOL_OPTIONS: "${JAVA_TOOL_OPTIONS:--Xms1024m -Xmx2048m -XX:+UseG1GC}"
       MYSQL_HOST: mysql
       MYSQL_PORT: 3306
       MYSQL_DATABASE: ${MYSQL_DATABASE:-astock_business}
       MYSQL_USER: ${MYSQL_USER:-astock}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-astock_pwd}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-pamirs@123}
       CLICKHOUSE_HOST: clickhouse
       CLICKHOUSE_HTTP_PORT: 8123
       CLICKHOUSE_DATABASE: ${CLICKHOUSE_DATABASE:-astock_analysis}
       CLICKHOUSE_USER: ${CLICKHOUSE_USER:-default}
-      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-pamirs@123}
     ports:
       - "${BACKEND_PORT:-8080}:8080"
     healthcheck:
