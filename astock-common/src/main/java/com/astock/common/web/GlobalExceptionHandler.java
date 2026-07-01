@@ -15,6 +15,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ApiResult<Void> handleException(Exception ex) {
+        ex.printStackTrace();
         return ApiResult.fail("SYSTEM_ERROR", ex.getMessage());
     }
 }

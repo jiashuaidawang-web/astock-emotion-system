@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 8081
 
 spring:
   application:
@@ -9,14 +9,14 @@ spring:
       enabled: true
   datasource:
     mysql:
-      url: jdbc:mysql://127.0.0.1:3306/astock_emotion_system?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
-      username: root
-      password: root
+      url: jdbc:mysql://124.223.220.245:3306/astock_business?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+      username: astock
+      password: pamirs@123
       driver-class-name: com.mysql.cj.jdbc.Driver
     clickhouse:
-      url: jdbc:clickhouse://127.0.0.1:8123/astock_emotion_ck
+      url: jdbc:clickhouse://124.223.220.245:8123/astock_emotion_ck
       username: default
-      password:
+      password: pamirs@123
       driver-class-name: com.clickhouse.jdbc.ClickHouseDriver
 
 astock:

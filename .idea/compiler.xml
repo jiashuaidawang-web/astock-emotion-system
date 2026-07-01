@@ -7,7 +7,7 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="false">
-          <entry name="$USER_HOME$/environment/maven/repository1/org/projectlombok/lombok/1.18.34/lombok-1.18.34.jar" />
+          <entry name="$PROJECT_DIR$/../../../Environment/apache-maven-3.9.16/repository1/org/projectlombok/lombok/1.18.34/lombok-1.18.34.jar" />
         </processorPath>
         <module name="module-leader" />
         <module name="module-sample" />
@@ -18,32 +18,14 @@
         <module name="module-agent-audit" />
         <module name="module-backtest" />
         <module name="module-mainline" />
+        <module name="astock-api" />
         <module name="astock-infrastructure" />
         <module name="module-risk" />
         <module name="module-rule" />
+        <module name="astock-common" />
         <module name="module-emotion" />
         <module name="module-pattern" />
         <module name="astock-app" />
-      </profile>
-      <profile name="Annotation profile for astock-api" enabled="true">
-        <sourceOutputDir name="target/generated-sources/annotations" />
-        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
-        <outputRelativeToContentRoot value="true" />
-        <processorPath useClasspath="false">
-          <entry name="$USER_HOME$/environment/maven/repository1/org/projectlombok/lombok/1.18.34/lombok-1.18.34.jar" />
-          <entry name="$USER_HOME$/environment/maven/repository1/org/projectlombok/lombok/1.18.34/lombok-1.18.34.jar" />
-        </processorPath>
-        <module name="astock-api" />
-      </profile>
-      <profile name="Annotation profile for astock-common" enabled="true">
-        <sourceOutputDir name="target/generated-sources/annotations" />
-        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
-        <outputRelativeToContentRoot value="true" />
-        <processorPath useClasspath="false">
-          <entry name="$USER_HOME$/environment/maven/repository1/org/projectlombok/lombok/1.18.34/lombok-1.18.34.jar" />
-          <entry name="$USER_HOME$/environment/maven/repository1/org/projectlombok/lombok/1.18.34/lombok-1.18.34.jar" />
-        </processorPath>
-        <module name="astock-common" />
       </profile>
     </annotationProcessing>
   </component>
