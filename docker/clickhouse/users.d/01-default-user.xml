@@ -1,0 +1,21 @@
+﻿<clickhouse>
+    <profiles>
+        <default>
+            <max_memory_usage>10000000000</max_memory_usage>
+            <use_uncompressed_cache>0</use_uncompressed_cache>
+            <load_balancing>random</load_balancing>
+        </default>
+    </profiles>
+
+    <users>
+        <default replace="replace">
+            <password replace="replace">pamirs@123</password>
+            <access_management replace="replace">1</access_management>
+            <networks replace="replace">
+                <ip>::/0</ip>
+            </networks>
+            <profile replace="replace">default</profile>
+            <quota replace="replace">default</quota>
+        </default>
+    </users>
+</clickhouse>
