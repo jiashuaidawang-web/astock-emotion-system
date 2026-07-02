@@ -1,4 +1,4 @@
-services:
+﻿services:
   mysql:
     image: mysql:8.0
     container_name: astock-mysql
@@ -84,7 +84,7 @@ services:
       context: .
       dockerfile: docker/frontend/Dockerfile
       args:
-        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://127.0.0.1:8080}
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-}
     container_name: astock-frontend
     restart: unless-stopped
     depends_on:
@@ -95,3 +95,4 @@ services:
 volumes:
   astock_mysql_data:
   astock_clickhouse_data:
+
