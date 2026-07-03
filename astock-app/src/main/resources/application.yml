@@ -28,3 +28,11 @@ astock:
     forbid-mock-data: true
     require-rule-version: true
     require-data-lineage: true
+
+spider:
+  ths:
+    browser:
+      remote-url: ${SELENIUM_REMOTE_URL:}
+      headless: ${THS_BROWSER_HEADLESS:true}
+      chrome-binary: ${THS_CHROME_BINARY:}
+      chrome-driver: ${THS_CHROME_DRIVER:}

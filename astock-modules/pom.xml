@@ -11,17 +11,18 @@
     <packaging>pom</packaging>
     <modules>
         <module>module-market</module>
-<module>module-emotion</module>
-<module>module-similarity</module>
-<module>module-sample</module>
-<module>module-mainline</module>
-<module>module-sector</module>
-<module>module-leader</module>
-<module>module-pattern</module>
-<module>module-risk</module>
-<module>module-backtest</module>
-<module>module-review</module>
-<module>module-rule</module>
-<module>module-agent-audit</module>
+        <module>module-emotion</module>
+        <module>module-similarity</module>
+        <module>module-sample</module>
+        <module>module-mainline</module>
+        <module>module-sector</module>
+        <module>module-leader</module>
+        <module>module-pattern</module>
+        <module>module-risk</module>
+        <module>module-backtest</module>
+        <module>module-review</module>
+        <module>module-rule</module>
+        <module>module-agent-audit</module>
+        <module>module-spider</module>
     </modules>
 </project>

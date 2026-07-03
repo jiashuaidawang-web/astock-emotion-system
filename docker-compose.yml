@@ -47,6 +47,24 @@
       timeout: 5s
       retries: 20
 
+  selenium-chrome:
+    image: selenium/standalone-chrome:4.23.1
+    container_name: astock-selenium-chrome
+    restart: unless-stopped
+    shm_size: "2gb"
+    environment:
+      SE_NODE_MAX_SESSIONS: 1
+      SE_NODE_OVERRIDE_MAX_SESSIONS: "true"
+      TZ: Asia/Shanghai
+    ports:
+      - "${SELENIUM_PORT:-4444}:4444"
+      - "${SELENIUM_VNC_PORT:-7900}:7900"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:4444/status | grep -Eq '\"ready\"[[:space:]]*:[[:space:]]*true'"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
   backend:
     build:
       context: .
@@ -57,6 +75,8 @@
       mysql:
         condition: service_healthy
       clickhouse:
+        condition: service_healthy
+      selenium-chrome:
         condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-local}
@@ -71,6 +91,7 @@
       CLICKHOUSE_DATABASE: ${CLICKHOUSE_DATABASE:-astock_analysis}
       CLICKHOUSE_USER: ${CLICKHOUSE_USER:-default}
       CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-pamirs@123}
+      SELENIUM_REMOTE_URL: ${SELENIUM_REMOTE_URL:-http://selenium-chrome:4444/wd/hub}
     ports:
       - "${BACKEND_PORT:-8080}:8080"
     healthcheck:
@@ -95,5 +116,4 @@
 volumes:
   astock_mysql_data:
   astock_clickhouse_data:
-
 
