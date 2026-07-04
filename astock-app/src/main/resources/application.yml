@@ -36,3 +36,21 @@ spider:
       headless: ${THS_BROWSER_HEADLESS:true}
       chrome-binary: ${THS_CHROME_BINARY:}
       chrome-driver: ${THS_CHROME_DRIVER:}
+      proxy-pool: ${THS_PROXY_POOL:}
+      proxy-provider-url: ${THS_PROXY_PROVIDER_URL:}
+      proxy-provider-urls: ${THS_PROXY_PROVIDER_URLS:https://api.openproxylist.xyz/http.txt,https://www.qiyunip.com/freeProxy,https://www.89ip.cn/}
+      proxy-pool-refresh-seconds: ${THS_PROXY_POOL_REFRESH_SECONDS:300}
+      max-proxy-pool-size: ${THS_MAX_PROXY_POOL_SIZE:200}
+      min-usable-proxy-count: ${THS_MIN_USABLE_PROXY_COUNT:30}
+      proxy-candidate-limit: ${THS_PROXY_CANDIDATE_LIMIT:1000}
+      proxy-provider-page-limit: ${THS_PROXY_PROVIDER_PAGE_LIMIT:10}
+      proxy-test-url: ${THS_PROXY_TEST_URL:http://q.10jqka.com.cn/gn/}
+      proxy-test-timeout-ms: ${THS_PROXY_TEST_TIMEOUT_MS:3000}
+      proxy-pool-monitor-delay-ms: ${THS_PROXY_POOL_MONITOR_DELAY_MS:60000}
+      proxy-pool-initial-delay-ms: ${THS_PROXY_POOL_INITIAL_DELAY_MS:15000}
+      proxy-pool-log-enabled: ${THS_PROXY_POOL_LOG_ENABLED:true}
+      proxy-pool-log-delay-ms: ${THS_PROXY_POOL_LOG_DELAY_MS:5000}
+      candidate-proxy-log-limit: ${THS_CANDIDATE_PROXY_LOG_LIMIT:200}
+      max-proxy-retries: ${THS_MAX_PROXY_RETRIES:30}
+      direct-first: ${THS_DIRECT_FIRST:false}
+      proxy-pool-warmup-wait-ms: ${THS_PROXY_POOL_WARMUP_WAIT_MS:60000}

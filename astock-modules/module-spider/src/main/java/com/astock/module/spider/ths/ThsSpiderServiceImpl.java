@@ -61,6 +61,8 @@ public class ThsSpiderServiceImpl implements ThsSpiderService {
     private final SpiderCheckpointService checkpointService;
     private final ObjectMapper objectMapper;
     private final ThsBrowserProperties browserProperties;
+    private final ThsProxyProvider proxyProvider;
+    private final ThreadLocal<String> currentProxy = new ThreadLocal<>();
 
     @Override
     public Map<String, Object> syncDaily(LocalDate tradeDate) {
@@ -79,9 +81,15 @@ public class ThsSpiderServiceImpl implements ThsSpiderService {
         int sourceTotal = 0;
         int fetched = 0;
         int inserted = 0;
-        WebDriver driver = null;
-        try {
-            driver = createDriver();
+        RuntimeException lastException = null;
+        int maxAttempts = maxThsAttempts();
+        for (int attempt = 0; attempt < maxAttempts; attempt++) {
+            WebDriver driver = null;
+            String proxy = selectProxy(attempt);
+            currentProxy.set(proxy);
+            try {
+                log.info("同花顺板块行情同步开始, attempt={}, proxy={}", attempt + 1, proxyLabel(proxy));
+                driver = createDriver(proxy);
             for (ThsEndpoint endpoint : ThsEndpoint.values()) {
                 List<ThsPlate> plates = fetchPlateList(driver, endpoint);
                 sourceTotal += plates.size();
@@ -106,11 +114,21 @@ public class ThsSpiderServiceImpl implements ThsSpiderService {
             auditService.finish(tradeDate, table, DAILY, inserted, Map.of("source", "ths"));
             return inserted;
         } catch (Exception e) {
-            auditService.fail(tradeDate, table, DAILY, e, Map.of("source", "ths"));
-            throw new IllegalStateException("同花顺板块行情同步失败", e);
+                lastException = new IllegalStateException("同花顺板块行情同步失败", e);
+                if (!shouldRotateProxy(e) || attempt >= maxAttempts - 1) {
+                    auditService.fail(tradeDate, table, DAILY, e, Map.of("source", "ths", "proxy", proxyLabel(proxy)));
+                    throw lastException;
+                }
+                proxyProvider.reportBadProxy(proxy, e);
+                log.warn("同花顺板块行情触发反爬/滑块/403/代理异常, 准备切换代理后续跑, attempt={}, proxy={}, error={}",
+                        attempt + 1, proxyLabel(proxy), rootMessage(e));
+                sleep(1500);
         } finally {
             quit(driver);
+                currentProxy.remove();
+            }
         }
+        throw lastException == null ? new IllegalStateException("同花顺板块行情同步失败") : lastException;
     }
 
     private int syncPlateRelations(LocalDate tradeDate) {
@@ -119,9 +137,15 @@ public class ThsSpiderServiceImpl implements ThsSpiderService {
         int sourceTotal = 0;
         int fetched = 0;
         int inserted = 0;
-        WebDriver driver = null;
-        try {
-            driver = createDriver();
+        RuntimeException lastException = null;
+        int maxAttempts = maxThsAttempts();
+        for (int attempt = 0; attempt < maxAttempts; attempt++) {
+            WebDriver driver = null;
+            String proxy = selectProxy(attempt);
+            currentProxy.set(proxy);
+            try {
+                log.info("同花顺板块关系同步开始, attempt={}, proxy={}", attempt + 1, proxyLabel(proxy));
+                driver = createDriver(proxy);
             for (ThsEndpoint endpoint : ThsEndpoint.values()) {
                 List<ThsPlate> plates = fetchPlateList(driver, endpoint);
                 for (ThsPlate plate : plates) {
@@ -136,7 +160,7 @@ public class ThsSpiderServiceImpl implements ThsSpiderService {
                     int plateFetched = 0;
                     int plateInserted = 0;
                     for (int page = nextPage; page <= totalPage; page++) {
-                        ThsPlatePage platePage = fetchRelationPage(plate, page, totalPage, cookie);
+                        ThsPlatePage platePage = fetchRelationPage(driver, plate, page, totalPage, cookie);
                         List<StockPlateRelationRow> rows = platePage.rows().stream()
                                 .map(row -> toRelation(tradeDate, plate, row))
                                 .toList();
@@ -160,11 +184,21 @@ public class ThsSpiderServiceImpl implements ThsSpiderService {
             auditService.finish(tradeDate, table, DAILY, inserted, Map.of("source", "ths"));
             return inserted;
         } catch (Exception e) {
-            auditService.fail(tradeDate, table, DAILY, e, Map.of("source", "ths"));
-            throw new IllegalStateException("同花顺板块关系同步失败", e);
+                lastException = new IllegalStateException("同花顺板块关系同步失败", e);
+                if (!shouldRotateProxy(e) || attempt >= maxAttempts - 1) {
+                    auditService.fail(tradeDate, table, DAILY, e, Map.of("source", "ths", "proxy", proxyLabel(proxy)));
+                    throw lastException;
+                }
+                proxyProvider.reportBadProxy(proxy, e);
+                log.warn("同花顺触发反爬/滑块/403/代理异常, 准备切换代理后续跑, attempt={}, proxy={}, error={}",
+                        attempt + 1, proxyLabel(proxy), rootMessage(e));
+                sleep(1500);
         } finally {
             quit(driver);
+                currentProxy.remove();
+            }
         }
+        throw lastException == null ? new IllegalStateException("同花顺板块关系同步失败") : lastException;
     }
 
     private List<ThsPlate> fetchPlateList(WebDriver driver, ThsEndpoint endpoint) {
@@ -254,12 +288,9 @@ public class ThsSpiderServiceImpl implements ThsSpiderService {
         return row;
     }
 
-    private ThsPlatePage fetchRelationPage(ThsPlate plate, int page, int totalPage, String cookie) {
+    private ThsPlatePage fetchRelationPage(WebDriver driver, ThsPlate plate, int page, int totalPage, String cookie) {
         String url = buildRelationUrl(plate, page);
-        String html = httpClient.get(url, Map.of(
-                "Cookie", cookie,
-                "Host", "q.10jqka.com.cn",
-                "Referer", plate.href()));
+        String html = fetchRelationHtml(driver, plate, url, cookie);
         Document document = Jsoup.parse(html);
         List<ThsStockRow> rows = new ArrayList<>();
         for (Element tr : document.select("tbody tr")) {
@@ -281,6 +312,37 @@ public class ThsSpiderServiceImpl implements ThsSpiderService {
             rows.add(new ThsStockRow(stockCode, stockName));
         }
         return new ThsPlatePage(rows.size(), totalPage, page, rows);
+    }
+
+    private String fetchRelationHtml(WebDriver driver, ThsPlate plate, String url, String cookie) {
+        try {
+            return httpClient.getByUrlConnection(url, thsAjaxHeaders(plate, cookie), currentProxy.get());
+        } catch (Exception e) {
+            log.warn("同花顺Ajax请求失败, 改用Selenium打开Ajax页, plateCode={}, url={}, error={}",
+                    plate.plateCode(), url, e.getMessage());
+            driver.get(url);
+            sleep(800);
+            String html = driver.getPageSource();
+            if (html != null && html.contains("Nginx forbidden")) {
+                throw new IllegalStateException("同花顺Ajax Selenium访问仍被拒绝, plateCode="
+                        + plate.plateCode() + ", url=" + url + ", pageText=" + safeBodyText(driver));
+            }
+            return html == null ? "" : html;
+        }
+    }
+
+    private Map<String, String> thsAjaxHeaders(ThsPlate plate, String cookie) {
+        Map<String, String> headers = new LinkedHashMap<>();
+        headers.put("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
+        headers.put("Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6");
+        headers.put("Cache-Control", "max-age=0");
+        headers.put("Cookie", cookie);
+        headers.put("Host", "q.10jqka.com.cn");
+        headers.put("Referer", plate.href());
+        headers.put("Upgrade-Insecure-Requests", "1");
+        headers.put("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                + "(KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36");
+        return headers;
     }
 
     private String buildRelationUrl(ThsPlate plate, int page) {
@@ -333,7 +395,7 @@ public class ThsSpiderServiceImpl implements ThsSpiderService {
         return String.join("; ", values);
     }
 
-    private WebDriver createDriver() {
+    private WebDriver createDriver(String proxyAddress) {
         ChromeOptions options = new ChromeOptions();
         if (browserProperties.isHeadless()) {
             options.addArguments("--headless=new");
@@ -343,6 +405,9 @@ public class ThsSpiderServiceImpl implements ThsSpiderService {
         }
         if (browserProperties.getArguments() != null) {
             options.addArguments(browserProperties.getArguments());
+        }
+        if (StringUtils.hasText(proxyAddress)) {
+            options.addArguments("--proxy-server=http://" + normalizeProxy(proxyAddress));
         }
         options.setExperimentalOption("excludeSwitches", List.of("enable-automation"));
         if (browserProperties.getRemoteUrl() != null && !browserProperties.getRemoteUrl().isBlank()) {
@@ -360,6 +425,91 @@ public class ThsSpiderServiceImpl implements ThsSpiderService {
         WebDriver driver = new ChromeDriver(options);
         prepareDriver(driver);
         return driver;
+    }
+
+    private String selectProxy(int attempt) {
+        List<String> proxies = normalizedProxyPool();
+        if (proxies.isEmpty()) {
+            if (browserProperties.isDirectFirst()) {
+                return "";
+            }
+            throw new IllegalStateException("同花顺代理池未就绪: 健康代理数量为0，请先等待代理池拉取和探测完成");
+        }
+        if (browserProperties.isDirectFirst()) {
+            if (attempt == 0) {
+                return "";
+            }
+            return proxies.get((attempt - 1) % proxies.size());
+        }
+        return proxies.get(attempt % proxies.size());
+    }
+
+    private List<String> normalizedProxyPool() {
+        return proxyProvider.availableProxies().stream()
+                .filter(StringUtils::hasText)
+                .map(this::normalizeProxy)
+                .distinct()
+                .toList();
+    }
+
+    private String normalizeProxy(String proxyAddress) {
+        return proxyAddress
+                .replace("http://", "")
+                .replace("https://", "")
+                .trim();
+    }
+
+    private int maxThsAttempts() {
+        int proxyCount = normalizedProxyPool().size();
+        int retryCount = Math.max(0, browserProperties.getMaxProxyRetries());
+        int configuredAttempts = 1 + retryCount;
+        if (proxyCount == 0) {
+            if (!browserProperties.isDirectFirst()) {
+                throw new IllegalStateException("同花顺代理池未就绪: 健康代理数量为0，请先等待代理池拉取和探测完成");
+            }
+            return 1;
+        }
+        if (browserProperties.isDirectFirst()) {
+            return Math.min(configuredAttempts, proxyCount + 1);
+        }
+        return Math.min(configuredAttempts, proxyCount);
+    }
+
+    private boolean shouldRotateProxy(Throwable throwable) {
+        String message = rootMessage(throwable).toLowerCase();
+        return message.contains("403")
+                || message.contains("forbidden")
+                || message.contains("nginx forbidden")
+                || message.contains("滑块")
+                || message.contains("验证码")
+                || message.contains("验证")
+                || message.contains("captcha")
+                || message.contains("proxy")
+                || message.contains("timed out")
+                || message.contains("timeout")
+                || message.contains("connection refused")
+                || message.contains("connection reset")
+                || message.contains("unreachable")
+                || message.contains("err_proxy")
+                || message.contains("net::err")
+                || message.contains("tunnel")
+                || message.contains("failed to establish");
+    }
+
+    private String rootMessage(Throwable throwable) {
+        Throwable cursor = throwable;
+        String message = "";
+        while (cursor != null) {
+            if (StringUtils.hasText(cursor.getMessage())) {
+                message = cursor.getMessage();
+            }
+            cursor = cursor.getCause();
+        }
+        return message;
+    }
+
+    private String proxyLabel(String proxy) {
+        return StringUtils.hasText(proxy) ? normalizeProxy(proxy) : "DIRECT";
     }
 
     private void prepareDriver(WebDriver driver) {

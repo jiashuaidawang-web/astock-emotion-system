@@ -2,6 +2,7 @@ package com.astock.module.spider.controller;
 
 import com.astock.common.api.ApiResult;
 import com.astock.module.spider.job.SpiderJob;
+import com.astock.module.spider.ths.ThsProxyProvider;
 import java.time.LocalDate;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class SpiderController {
 
     private final SpiderJob spiderJob;
+    private final ThsProxyProvider thsProxyProvider;
 
     @GetMapping("/dc/daily")
     public ApiResult<Map<String, Object>> runEastMoneyDaily(
@@ -30,6 +32,16 @@ public class SpiderController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate tradeDate) {
         LocalDate realTradeDate = tradeDate == null ? LocalDate.now() : tradeDate;
         return ApiResult.success(spiderJob.runThsDaily(realTradeDate));
+    }
+
+    @GetMapping("/ths/proxy/warmup")
+    public ApiResult<Map<String, Object>> warmupThsProxyPool() {
+        return ApiResult.success(thsProxyProvider.warmup());
+    }
+
+    @GetMapping("/ths/proxy/candidates")
+    public ApiResult<Map<String, Object>> thsProxyCandidates() {
+        return ApiResult.success(thsProxyProvider.candidates());
     }
 
     @GetMapping("/validate")

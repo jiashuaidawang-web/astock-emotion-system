@@ -46,7 +46,7 @@ public class DcApiClient {
     public DcPoolResult fetchPool(DcEndpoint endpoint, LocalDate tradeDate) {
         String url = String.format(endpoint.getUrlTemplate(), tradeDate.format(BASIC_DATE), System.currentTimeMillis());
         try {
-            JsonNode root = jsonpParser.parse(httpClient.get(url));
+            JsonNode root = jsonpParser.parse(httpClient.getByUrlConnection(url));
             JsonNode data = root.path("data");
             int total = data.path("tc").asInt(0);
             LocalDate queryDate = parseQueryDate(data.path("qdate").asText(""));
@@ -64,7 +64,7 @@ public class DcApiClient {
         int totalPage = 1;
         for (int page = 1; page <= totalPage; page++) {
             try {
-                JsonNode root = jsonpParser.parse(httpClient.get(urlBuilder.build(page)));
+                JsonNode root = jsonpParser.parse(httpClient.getByUrlConnection(urlBuilder.build(page)));
                 JsonNode data = root.path("data");
                 total = data.path("total").asInt(total);
                 totalPage = Math.max(1, (int) Math.ceil(total / (double) PAGE_SIZE));
@@ -78,7 +78,7 @@ public class DcApiClient {
 
     private DcSinglePageResult fetchPage(int page, String url) {
         try {
-            JsonNode root = jsonpParser.parse(httpClient.get(url));
+            JsonNode root = jsonpParser.parse(httpClient.getByUrlConnection(url));
             JsonNode data = root.path("data");
             int total = data.path("total").asInt(0);
             int totalPage = Math.max(1, (int) Math.ceil(total / (double) PAGE_SIZE));
