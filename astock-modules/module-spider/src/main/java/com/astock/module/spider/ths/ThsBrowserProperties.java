@@ -31,7 +31,9 @@ public class ThsBrowserProperties {
     /**
      * Optional HTTP proxy pool, format: ip:port or http://ip:port.
      */
-    private List<String> proxyPool = new ArrayList<>();
+    private List<String> proxyPool = new ArrayList<>(List.of(
+            "149.28.66.23:7890"
+    ));
 
     /**
      * Optional proxy provider API. The response may be plain text or JSON as long as it contains ip:port values.
@@ -41,11 +43,7 @@ public class ThsBrowserProperties {
     /**
      * Optional proxy provider APIs, separated by comma in environment variables.
      */
-    private List<String> proxyProviderUrls = new ArrayList<>(List.of(
-            "https://api.openproxylist.xyz/http.txt",
-            "https://www.qiyunip.com/freeProxy",
-            "https://www.89ip.cn/"
-    ));
+    private List<String> proxyProviderUrls = new ArrayList<>();
 
     /**
      * In-memory proxy cache refresh interval.
@@ -76,6 +74,16 @@ public class ThsBrowserProperties {
      * Probe URL used to verify a proxy can really access TongHuaShun.
      */
     private String proxyTestUrl = "http://q.10jqka.com.cn/gn/";
+
+    /**
+     * Probe URLs used to verify a proxy can access all TongHuaShun board entry pages.
+     */
+    private List<String> proxyTestUrls = new ArrayList<>(List.of(
+            "http://q.10jqka.com.cn/gn/",
+            "http://q.10jqka.com.cn/dy/",
+            "http://q.10jqka.com.cn/thshy/",
+            "http://q.10jqka.com.cn/zjhhy/"
+    ));
 
     /**
      * Timeout for each proxy probe. Keep it short because public proxy lists contain many dead endpoints.

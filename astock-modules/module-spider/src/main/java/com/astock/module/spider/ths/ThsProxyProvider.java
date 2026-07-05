@@ -40,9 +40,7 @@ public class ThsProxyProvider {
     private static final Set<String> BLOCK_WORDS = Set.of(
             "nginx forbidden", "forbidden", "captcha", "验证码", "滑块", "访问过于频繁", "blocked");
     private static final List<String> DEFAULT_PROVIDER_URLS = List.of(
-            "https://api.openproxylist.xyz/http.txt",
-            "https://www.qiyunip.com/freeProxy",
-            "https://www.89ip.cn/"
+            "https://www.qiyunip.com/freeProxy"
     );
 
     private final ThsBrowserProperties properties;
@@ -186,27 +184,16 @@ public class ThsProxyProvider {
         log.info("同花顺代理候选池拉取完成, candidates={}, beforeHealthy={}, providers={}",
                 candidates.size(), before.size(), providerUrls());
 
-        List<String> verified = new ArrayList<>();
         int maxPoolSize = Math.max(1, properties.getMaxProxyPoolSize());
-        for (String candidate : before) {
-            if (verified.size() >= maxPoolSize) {
-                break;
-            }
-            String proxy = normalize(candidate);
-            if (isValidProxy(proxy)) {
-                verified.add(proxy);
-            }
-        }
+        List<String> verified = new ArrayList<>();
         int targetCount = maxPoolSize;
-        if (verified.size() < targetCount) {
-            List<String> needTest = candidates.stream()
-                    .map(this::normalize)
-                    .filter(this::isValidProxy)
-                    .filter(proxy -> !verified.contains(proxy))
-                    .limit(Math.max(targetCount, properties.getProxyTestCandidateLimit()))
-                    .toList();
-            verified.addAll(testProxiesConcurrently(needTest, targetCount - verified.size()));
-        }
+        List<String> needTest = candidates.stream()
+                .map(this::normalize)
+                .filter(this::isValidProxy)
+                .distinct()
+                .limit(Math.max(targetCount, properties.getProxyTestCandidateLimit()))
+                .toList();
+        verified.addAll(testProxiesConcurrently(needTest, targetCount));
         healthyProxies = List.copyOf(verified);
         log.info("同花顺健康代理池维护完成, before={}, after={}, minUsable={}, concurrency={}, providerConfigured={}",
                 before.size(), healthyProxies.size(), minUsable,
@@ -449,29 +436,68 @@ public class ThsProxyProvider {
     private boolean testProxy(String proxy) {
         try {
             int timeout = Math.max(1_000, properties.getProxyTestTimeoutMs());
-            String body = httpClient.getByUrlConnection(
-                    properties.getProxyTestUrl(), thsProbeHeaders(), proxy, timeout, timeout);
-            if (!StringUtils.hasText(body)) {
-                return false;
-            }
-            String lower = body.toLowerCase();
-            for (String blockWord : BLOCK_WORDS) {
-                if (lower.contains(blockWord.toLowerCase())) {
+            for (String url : proxyTestUrls()) {
+                String body = httpClient.getByUrlConnection(url, thsProbeHeaders(url), proxy, timeout, timeout);
+                if (!usableThsBody(body)) {
+                    log.debug("同花顺代理探测未通过, proxy={}, url={}, body={}",
+                            proxy, url, briefBody(body));
                     return false;
                 }
             }
-            return lower.contains("10jqka") || body.contains("同花顺") || body.contains("板块") || body.length() > 1000;
+            return true;
         } catch (Exception e) {
             log.debug("同花顺代理探测失败, proxy={}, error={}", proxy, e.getMessage());
             return false;
         }
     }
 
-    private java.util.Map<String, String> thsProbeHeaders() {
+    private boolean usableThsBody(String body) {
+        if (!StringUtils.hasText(body)) {
+            return false;
+        }
+        String lower = body.toLowerCase();
+        for (String blockWord : BLOCK_WORDS) {
+            if (lower.contains(blockWord.toLowerCase())) {
+                return false;
+            }
+        }
+        return body.contains("/detail/code/")
+                || body.contains("同花顺")
+                || body.contains("板块")
+                || lower.contains("10jqka");
+    }
+
+    private String briefBody(String body) {
+        if (!StringUtils.hasText(body)) {
+            return "";
+        }
+        String text = Jsoup.parse(body).text().replaceAll("\\s+", " ").trim();
+        return text.length() <= 160 ? text : text.substring(0, 160);
+    }
+
+    private List<String> proxyTestUrls() {
+        Set<String> urls = new LinkedHashSet<>();
+        if (properties.getProxyTestUrls() != null) {
+            properties.getProxyTestUrls().stream()
+                    .filter(StringUtils::hasText)
+                    .map(String::trim)
+                    .forEach(urls::add);
+        }
+        if (StringUtils.hasText(properties.getProxyTestUrl())) {
+            urls.add(properties.getProxyTestUrl().trim());
+        }
+        if (urls.isEmpty()) {
+            urls.add("http://q.10jqka.com.cn/gn/");
+        }
+        return new ArrayList<>(urls);
+    }
+
+    private java.util.Map<String, String> thsProbeHeaders(String url) {
         java.util.Map<String, String> headers = new java.util.LinkedHashMap<>();
         headers.put("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
         headers.put("Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8");
         headers.put("Referer", "http://q.10jqka.com.cn/");
+        headers.put("Host", "q.10jqka.com.cn");
         headers.put("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
                 + "(KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36");
         return headers;

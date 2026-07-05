@@ -123,7 +123,8 @@ public class ThsSpiderServiceImpl implements ThsSpiderService {
             auditService.finish(tradeDate, table, DAILY, inserted, Map.of("source", "ths"));
             return inserted;
         } catch (Exception e) {
-                lastException = new IllegalStateException("同花顺板块行情同步失败", e);
+                lastException = new IllegalStateException("同花顺板块行情同步失败: "
+                        + rootMessage(e) + ", proxy=" + proxyLabel(proxy), e);
                 if (!shouldRotateProxy(e) || attempt >= maxAttempts - 1) {
                     auditService.fail(tradeDate, table, DAILY, e, Map.of("source", "ths", "proxy", proxyLabel(proxy)));
                     throw lastException;
@@ -193,7 +194,8 @@ public class ThsSpiderServiceImpl implements ThsSpiderService {
             auditService.finish(tradeDate, table, DAILY, inserted, Map.of("source", "ths"));
             return inserted;
         } catch (Exception e) {
-                lastException = new IllegalStateException("同花顺板块关系同步失败", e);
+                lastException = new IllegalStateException("同花顺板块关系同步失败: "
+                        + rootMessage(e) + ", proxy=" + proxyLabel(proxy), e);
                 if (!shouldRotateProxy(e) || attempt >= maxAttempts - 1) {
                     auditService.fail(tradeDate, table, DAILY, e, Map.of("source", "ths", "proxy", proxyLabel(proxy)));
                     throw lastException;

@@ -6,12 +6,14 @@ import com.astock.module.spider.ths.ThsProxyProvider;
 import java.time.LocalDate;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/spider")
 @RequiredArgsConstructor
@@ -23,14 +25,18 @@ public class SpiderController {
     @GetMapping("/dc/daily")
     public ApiResult<Map<String, Object>> runEastMoneyDaily(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate tradeDate) {
+        log.info("东财开始跑批...");
         LocalDate realTradeDate = tradeDate == null ? LocalDate.now() : tradeDate;
+        log.info("东财结束跑批...");
         return ApiResult.success(spiderJob.runEastMoneyDaily(realTradeDate));
     }
 
     @GetMapping("/ths/daily")
     public ApiResult<Map<String, Object>> runThsDaily(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate tradeDate) {
+        log.info("同花顺开始跑批...");
         LocalDate realTradeDate = tradeDate == null ? LocalDate.now() : tradeDate;
+        log.info("同花顺结束跑批...");
         return ApiResult.success(spiderJob.runThsDaily(realTradeDate));
     }
 
