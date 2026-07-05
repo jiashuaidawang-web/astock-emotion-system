@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Map;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.RequestEntity;
 import org.springframework.stereotype.Component;
@@ -38,13 +39,18 @@ public class SpiderHttpClient {
     }
 
     public String get(String url, Map<String, String> headers) {
+        return get(url, headers, null);
+    }
+
+    public String get(String url, Map<String, String> headers, String proxyAddress) {
         RequestEntity.HeadersBuilder<?> builder = RequestEntity.get(url)
                 .header(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36")
                 .header(HttpHeaders.ACCEPT, "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
         if (headers != null) {
             headers.forEach(builder::header);
         }
-        return restTemplate.exchange(builder.build(), String.class).getBody();
+        RestTemplate template = StringUtils.hasText(proxyAddress) ? proxiedRestTemplate(proxyAddress) : restTemplate;
+        return template.exchange(builder.build(), String.class).getBody();
     }
 
     public String getByUrlConnection(String url) {
@@ -110,5 +116,13 @@ public class SpiderHttpClient {
             throw new IllegalArgumentException("Invalid proxy address: " + proxyAddress);
         }
         return new Proxy(Proxy.Type.HTTP, new InetSocketAddress(parts[0], Integer.parseInt(parts[1])));
+    }
+
+    private RestTemplate proxiedRestTemplate(String proxyAddress) {
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setProxy(proxy(proxyAddress));
+        factory.setConnectTimeout(10_000);
+        factory.setReadTimeout(20_000);
+        return new RestTemplate(factory);
     }
 }

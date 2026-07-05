@@ -45,7 +45,9 @@ spider:
       proxy-candidate-limit: ${THS_PROXY_CANDIDATE_LIMIT:1000}
       proxy-provider-page-limit: ${THS_PROXY_PROVIDER_PAGE_LIMIT:10}
       proxy-test-url: ${THS_PROXY_TEST_URL:http://q.10jqka.com.cn/gn/}
-      proxy-test-timeout-ms: ${THS_PROXY_TEST_TIMEOUT_MS:3000}
+      proxy-test-timeout-ms: ${THS_PROXY_TEST_TIMEOUT_MS:1500}
+      proxy-test-concurrency: ${THS_PROXY_TEST_CONCURRENCY:64}
+      proxy-test-candidate-limit: ${THS_PROXY_TEST_CANDIDATE_LIMIT:300}
       proxy-pool-monitor-delay-ms: ${THS_PROXY_POOL_MONITOR_DELAY_MS:60000}
       proxy-pool-initial-delay-ms: ${THS_PROXY_POOL_INITIAL_DELAY_MS:15000}
       proxy-pool-log-enabled: ${THS_PROXY_POOL_LOG_ENABLED:true}

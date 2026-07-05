@@ -11,6 +11,11 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -70,6 +75,14 @@ public class ThsProxyProvider {
                 "maxPoolSize", Math.max(1, properties.getMaxProxyPoolSize()),
                 "providerUrls", providerUrls(),
                 "proxies", snapshot);
+    }
+
+    public List<String> reusableProxies() {
+        List<String> healthySnapshot = healthyProxies;
+        if (!healthySnapshot.isEmpty()) {
+            return healthySnapshot;
+        }
+        return candidateProxies;
     }
 
     public Map<String, Object> candidates() {
@@ -175,21 +188,90 @@ public class ThsProxyProvider {
 
         List<String> verified = new ArrayList<>();
         int maxPoolSize = Math.max(1, properties.getMaxProxyPoolSize());
-        for (String candidate : candidates) {
+        for (String candidate : before) {
             if (verified.size() >= maxPoolSize) {
                 break;
             }
             String proxy = normalize(candidate);
-            if (!isValidProxy(proxy)) {
-                continue;
-            }
-            if (before.contains(proxy) || testProxy(proxy)) {
+            if (isValidProxy(proxy)) {
                 verified.add(proxy);
             }
         }
+        int targetCount = maxPoolSize;
+        if (verified.size() < targetCount) {
+            List<String> needTest = candidates.stream()
+                    .map(this::normalize)
+                    .filter(this::isValidProxy)
+                    .filter(proxy -> !verified.contains(proxy))
+                    .limit(Math.max(targetCount, properties.getProxyTestCandidateLimit()))
+                    .toList();
+            verified.addAll(testProxiesConcurrently(needTest, targetCount - verified.size()));
+        }
         healthyProxies = List.copyOf(verified);
-        log.info("同花顺健康代理池维护完成, before={}, after={}, minUsable={}, providerConfigured={}",
-                before.size(), healthyProxies.size(), minUsable, !providerUrls().isEmpty());
+        log.info("同花顺健康代理池维护完成, before={}, after={}, minUsable={}, concurrency={}, providerConfigured={}",
+                before.size(), healthyProxies.size(), minUsable,
+                Math.max(1, properties.getProxyTestConcurrency()), !providerUrls().isEmpty());
+    }
+
+    private List<String> testProxiesConcurrently(List<String> candidates, int needCount) {
+        if (needCount <= 0 || candidates.isEmpty()) {
+            return List.of();
+        }
+        int concurrency = Math.max(1, properties.getProxyTestConcurrency());
+        int testLimit = Math.max(needCount, properties.getProxyTestCandidateLimit());
+        List<String> batch = candidates.stream().limit(testLimit).toList();
+        List<String> verified = new ArrayList<>();
+        Instant start = Instant.now();
+        log.info("同花顺代理并发探测开始, candidates={}, need={}, concurrency={}, timeoutMs={}",
+                batch.size(), needCount, concurrency, Math.max(1_000, properties.getProxyTestTimeoutMs()));
+
+        ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
+        try {
+            CompletionService<String> completionService = new ExecutorCompletionService<>(executor);
+            int submitted = 0;
+            int completed = 0;
+            for (String proxy : batch) {
+                if (submitted - completed >= concurrency) {
+                    String passed = takeProxyProbeResult(completionService);
+                    completed++;
+                    if (StringUtils.hasText(passed)) {
+                        verified.add(passed);
+                        if (verified.size() >= needCount) {
+                            executor.shutdownNow();
+                            break;
+                        }
+                    }
+                }
+                completionService.submit(() -> testProxy(proxy) ? proxy : "");
+                submitted++;
+            }
+            while (completed < submitted && verified.size() < needCount) {
+                String passed = takeProxyProbeResult(completionService);
+                completed++;
+                if (StringUtils.hasText(passed)) {
+                    verified.add(passed);
+                }
+            }
+        } finally {
+            executor.shutdownNow();
+        }
+
+        long elapsedMs = Duration.between(start, Instant.now()).toMillis();
+        log.info("同花顺代理并发探测完成, tested={}, passed={}, need={}, elapsedMs={}",
+                batch.size(), verified.size(), needCount, elapsedMs);
+        return verified;
+    }
+
+    private String takeProxyProbeResult(CompletionService<String> completionService) {
+        try {
+            Future<String> future = completionService.take();
+            return future.get();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return "";
+        } catch (Exception e) {
+            return "";
+        }
     }
 
     private void waitForWarmup() {

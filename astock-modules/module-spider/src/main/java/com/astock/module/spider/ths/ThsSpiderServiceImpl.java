@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
@@ -63,16 +64,24 @@ public class ThsSpiderServiceImpl implements ThsSpiderService {
     private final ThsBrowserProperties browserProperties;
     private final ThsProxyProvider proxyProvider;
     private final ThreadLocal<String> currentProxy = new ThreadLocal<>();
+    private final AtomicBoolean running = new AtomicBoolean(false);
 
     @Override
     public Map<String, Object> syncDaily(LocalDate tradeDate) {
-        int plateInserted = syncPlateDaily(tradeDate);
-        int relationInserted = syncPlateRelations(tradeDate);
-        return Map.of(
-                "tradeDate", tradeDate.toString(),
-                "source", "ths",
-                "plateInserted", plateInserted,
-                "relationInserted", relationInserted);
+        if (!running.compareAndSet(false, true)) {
+            throw new IllegalStateException("同花顺跑批任务正在执行中，请等待当前任务结束后再触发");
+        }
+        try {
+            int plateInserted = syncPlateDaily(tradeDate);
+            int relationInserted = syncPlateRelations(tradeDate);
+            return Map.of(
+                    "tradeDate", tradeDate.toString(),
+                    "source", "ths",
+                    "plateInserted", plateInserted,
+                    "relationInserted", relationInserted);
+        } finally {
+            running.set(false);
+        }
     }
 
     private int syncPlateDaily(LocalDate tradeDate) {
@@ -643,7 +652,11 @@ public class ThsSpiderServiceImpl implements ThsSpiderService {
 
     private void quit(WebDriver driver) {
         if (driver != null) {
-            driver.quit();
+            try {
+                driver.quit();
+            } catch (Exception e) {
+                log.warn("同花顺浏览器会话清理失败，已忽略，不影响真实业务异常返回, error={}", rootMessage(e));
+            }
         }
     }
 }

@@ -80,7 +80,17 @@ public class ThsBrowserProperties {
     /**
      * Timeout for each proxy probe. Keep it short because public proxy lists contain many dead endpoints.
      */
-    private int proxyTestTimeoutMs = 3_000;
+    private int proxyTestTimeoutMs = 1_500;
+
+    /**
+     * Concurrent virtual-thread workers used to verify candidate proxies.
+     */
+    private int proxyTestConcurrency = 64;
+
+    /**
+     * Max candidates tested in one refresh round. Public proxy lists are noisy, so scanning all of them is too slow.
+     */
+    private int proxyTestCandidateLimit = 300;
 
     /**
      * Background proxy pool maintenance interval.
