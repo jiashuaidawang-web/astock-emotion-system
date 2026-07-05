@@ -180,23 +180,55 @@ public class ThsProxyProvider {
         }
         List<String> before = healthyProxies;
         Set<String> candidates = new LinkedHashSet<>(before);
+        Set<String> configuredProxies = new LinkedHashSet<>();
+        if (properties.getProxyPool() != null) {
+            for (String p : properties.getProxyPool()) {
+                String norm = normalize(p);
+                if (StringUtils.hasText(norm) && isValidProxy(norm)) {
+                    configuredProxies.add(norm);
+                    candidates.add(norm);
+                }
+            }
+        }
         candidates.addAll(fetchCandidates(force));
-        log.info("同花顺代理候选池拉取完成, candidates={}, beforeHealthy={}, providers={}",
-                candidates.size(), before.size(), providerUrls());
+        log.info("同花顺代理候选池拉取完成, candidates={}, beforeHealthy={}, configured={}, providers={}",
+                candidates.size(), before.size(), configuredProxies.size(), providerUrls());
+
+        // Pre-add configured (manually set) proxies directly to healthy pool without probing
+        if (!configuredProxies.isEmpty()) {
+            synchronized (this) {
+                List<String> next = new ArrayList<>(healthyProxies);
+                for (String p : configuredProxies) {
+                    if (!next.contains(p)) {
+                        next.add(p);
+                    }
+                }
+                healthyProxies = List.copyOf(next);
+            }
+            log.info("同花顺手动配置代理已直接加入健康池, count={}, proxies={}",
+                    configuredProxies.size(), String.join(",", configuredProxies));
+        }
 
         int maxPoolSize = Math.max(1, properties.getMaxProxyPoolSize());
         List<String> verified = new ArrayList<>();
         int targetCount = maxPoolSize;
+        // Only probe non-configured candidates (free proxy sources)
         List<String> needTest = candidates.stream()
+                .filter(c -> !configuredProxies.contains(c))
                 .map(this::normalize)
                 .filter(this::isValidProxy)
                 .distinct()
                 .limit(Math.max(targetCount, properties.getProxyTestCandidateLimit()))
                 .toList();
         verified.addAll(testProxiesConcurrently(needTest, targetCount));
-        healthyProxies = List.copyOf(verified);
-        log.info("同花顺健康代理池维护完成, before={}, after={}, minUsable={}, concurrency={}, providerConfigured={}",
-                before.size(), healthyProxies.size(), minUsable,
+        // Merge configured proxies with verified free proxies
+        synchronized (this) {
+            List<String> merged = new ArrayList<>(configuredProxies);
+            merged.addAll(verified);
+            healthyProxies = List.copyOf(merged);
+        }
+        log.info("同花顺健康代理池维护完成, before={}, after={}, minUsable={}, configured={}, verified={}, concurrency={}, providerConfigured={}",
+                before.size(), healthyProxies.size(), minUsable, configuredProxies.size(), verified.size(),
                 Math.max(1, properties.getProxyTestConcurrency()), !providerUrls().isEmpty());
     }
 
