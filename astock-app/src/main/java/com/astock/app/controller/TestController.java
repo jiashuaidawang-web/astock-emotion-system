@@ -16,6 +16,7 @@ public class TestController {
 
     @GetMapping("/")
     public String pageLineage() {
+        System.out.println("我来了");
         return "ok";
     }
 }
