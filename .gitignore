@@ -10,6 +10,7 @@ desktop.ini
 *.iws
 compiler.xml
 encodings.xml
+*encodings.xml
 
 # Java / Maven generated
 **/target/
