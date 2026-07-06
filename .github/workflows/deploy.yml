@@ -30,7 +30,7 @@ jobs:
           username: "root"
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            export APP_DIR="/opt"
+            export APP_DIR="/opt/astock-emotion-system"
             cd $APP_DIR
             chmod +x start.sh
             ./start.sh # 执行你原有的 11 步启动与验证脚本！
