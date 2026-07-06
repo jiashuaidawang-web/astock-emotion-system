@@ -1,0 +1,36 @@
+name: AStock Simple Deploy
+
+on:
+  push:
+    branches:
+      - main  # 💡 只有当你把代码推送到 main 分支时，才会触发自动部署。如果你用的是 master 分支，请改成 master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      # 1. 自动化传代码：GitHub 自动把你最新的代码和脚本传到服务器上（只增量同步变化的文件，速度极快）
+      - name: Copy code to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: "124.223.220.245"        # 你的服务器 IP
+          username: "root"
+          key: ${{ secrets.SERVER_SSH_KEY }} # 刚才你在 GitHub 配置的那个宝箱钥匙
+          source: "./"                   # 把当前 Git 仓库里的所有代码全传过去
+          target: "/opt/astock-emotion-system" # 传到你服务器的这个目录
+
+      # 2. 自动化执行脚本：代码传完后，GitHub 远程连接你的服务器，直接执行你的 start.sh
+      - name: Execute start.sh
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: "124.223.220.245"
+          username: "root"
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            export APP_DIR="/opt/astock-emotion-system"
+            cd $APP_DIR
+            chmod +x start.sh
+            ./start.sh # 执行你原有的 11 步启动与验证脚本！

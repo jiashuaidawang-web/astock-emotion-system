@@ -58,5 +58,3 @@ curl -i "http://127.0.0.1:8080/api/dashboard/market?marketScope=A_SHARE"
 
 echo "11) 验证前端 Nginx 代理"
 curl -i "http://127.0.0.1:18080/api/dashboard/market?marketScope=A_SHARE"
-
-echo "部署完成"
