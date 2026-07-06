@@ -1,36 +1,84 @@
-name: AStock Simple Deploy
+name: AStock Cloud Build and Deploy
 
 on:
   push:
     branches:
-      - main  # 💡 只有当你把代码推送到 main 分支时，才会触发自动部署。如果你用的是 master 分支，请改成 master
+      - main  # 💡 如果你的默认主分支叫 master，请将其修改为 master
 
 jobs:
-  deploy:
+  # === 阶段 1：云端并行编译代码，并生成标准 Docker 镜像推送到阿里云 ===
+  build-and-push:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
         uses: actions/checkout@v4
 
-      # 1. 自动化传代码：GitHub 自动把你最新的代码和脚本传到服务器上（只增量同步变化的文件，速度极快）
-      - name: Copy code to server
+      # 1. 登录新版阿里云镜像仓库
+      - name: Log in to Aliyun Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ secrets.ALIYUN_REGISTRY }}
+          username: ${{ secrets.ALIYUN_USERNAME }}
+          password: ${{ secrets.ALIYUN_PASSWORD }}
+
+      # 2. 建立云端高级 Docker 编译环境
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # 3. 自动在云端完成 Java 编译、打包并推送后端镜像
+      - name: Build and push Backend Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/backend/Dockerfile
+          push: true
+          tags: ${{ secrets.ALIYUN_REGISTRY }}/astock-backend/astock-backend:latest
+
+      # 4. 自动在云端完成前端代码编译、打包并推送前端镜像
+      - name: Build and push Frontend Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/frontend/Dockerfile
+          push: true
+          tags: ${{ secrets.ALIYUN_REGISTRY }}/astock-backend/astock-frontend:latest
+
+  # === 阶段 2：通知服务器拉取阿里云新镜像，完成秒级部署 ===
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      # 1. 把最新的纯应用端配置文件（docker-compose.yml）远程传输到服务器上
+      - name: Copy docker-compose to server
         uses: appleboy/scp-action@v0.1.7
         with:
-          host: "124.223.220.245"        # 你的服务器 IP
+          host: "124.223.220.245"
           username: "root"
-          key: ${{ secrets.SERVER_SSH_KEY }} # 刚才你在 GitHub 配置的那个宝箱钥匙
-          source: "./"                   # 把当前 Git 仓库里的所有代码全传过去
-          target: "/opt/astock-emotion-system" # 传到你服务器的这个目录
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          source: "docker-compose.yml" # 💡 只需要这一个 yml 配置文件，彻底不再传输庞大的源码和多余的脚本！
+          target: "/opt/astock-emotion-system"
 
-      # 2. 自动化执行脚本：代码传完后，GitHub 远程连接你的服务器，直接执行你的 start.sh
-      - name: Execute start.sh
+      # 2. 远程连接服务器，登录阿里云并秒级重启容器
+      - name: SSH Remote Run
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: "124.223.220.245"
           username: "root"
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            export APP_DIR="/opt/astock-emotion-system"
-            cd $APP_DIR
-            chmod +x start.sh
-            ./start.sh # 执行你原有的 11 步启动与验证脚本！
+            cd /opt/astock-emotion-system
+            
+            # 让服务器登录你的阿里云私有仓库，确保有权限拉取镜像
+            docker login -u ${{ secrets.ALIYUN_USERNAME }} -p ${{ secrets.ALIYUN_PASSWORD }} ${{ secrets.ALIYUN_REGISTRY }}
+            
+            echo "正在从阿里云拉取最新的前端与后端镜像..."
+            docker compose pull backend frontend
+            
+            echo "正在强制重建应用容器..."
+            docker compose up -d --force-recreate backend frontend
+            
+            echo "部署完成！清理服务器上的虚悬镜像快照..."
+            docker image prune -f

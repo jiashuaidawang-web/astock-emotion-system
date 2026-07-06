@@ -1,52 +1,6 @@
-﻿services:
-  mysql:
-    image: mysql:8.0
-    container_name: astock-mysql
-    restart: unless-stopped
-    environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-astock_root}
-      MYSQL_DATABASE: ${MYSQL_DATABASE:-astock_business}
-      MYSQL_USER: ${MYSQL_USER:-astock}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-pamirs@123}
-      TZ: Asia/Shanghai
-    ports:
-      - "${MYSQL_PORT:-3306}:3306"
-    command:
-      - --default-authentication-plugin=mysql_native_password
-      - --character-set-server=utf8mb4
-      - --collation-server=utf8mb4_unicode_ci
-      - --max-connections=300
-    volumes:
-      - astock_mysql_data:/var/lib/mysql
-      - ./docker/mysql/conf.d:/etc/mysql/conf.d
-    healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -uroot -p$${MYSQL_ROOT_PASSWORD} --silent"]
-      interval: 10s
-      timeout: 5s
-      retries: 20
+﻿version: '3.8'
 
-  clickhouse:
-    image: clickhouse/clickhouse-server:23.8
-    container_name: astock-clickhouse
-    restart: unless-stopped
-    environment:
-      CLICKHOUSE_DB: ${CLICKHOUSE_DATABASE:-astock_analysis}
-      CLICKHOUSE_USER: ${CLICKHOUSE_USER:-default}
-      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-pamirs@123}
-      TZ: Asia/Shanghai
-    ports:
-      - "${CLICKHOUSE_HTTP_PORT:-8123}:8123"
-      - "${CLICKHOUSE_NATIVE_PORT:-9000}:9000"
-    volumes:
-      - astock_clickhouse_data:/var/lib/clickhouse
-      - ./docker/clickhouse/config.d/99-enable-http.xml:/etc/clickhouse-server/config.d/99-enable-http.xml:ro
-      - ./docker/clickhouse/users.d/zzzz-force-default-user.xml:/etc/clickhouse-server/users.d/zzzz-force-default-user.xml:ro
-    healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8123/ping | grep -q Ok"]
-      interval: 10s
-      timeout: 5s
-      retries: 20
-
+services:
   selenium-chrome:
     image: selenium/standalone-chrome:4.23.1
     container_name: astock-selenium-chrome
@@ -60,38 +14,37 @@
       - "${SELENIUM_PORT:-4444}:4444"
       - "${SELENIUM_VNC_PORT:-7900}:7900"
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:4444/status | grep -Eq '\"ready\"[[:space:]]*:[[:space:]]*true'"]
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0 | grep -Eq '\"ready\"[[:space:]]*:[[:space:]]*true'"]
       interval: 10s
       timeout: 5s
       retries: 20
 
   backend:
-    build:
-      context: .
-      dockerfile: docker/backend/Dockerfile
+    # 💡 核心：拉取你在云端用 GitHub Actions 编译好推送到阿里云的专属成品镜像
+    image: crpi-ecp3xwjlx8lx75f1.cn-hangzhou.personal.cr.aliyuncs.com
     container_name: astock-backend
     restart: unless-stopped
     depends_on:
-      mysql:
-        condition: service_healthy
-      clickhouse:
-        condition: service_healthy
       selenium-chrome:
         condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-local}
       JAVA_TOOL_OPTIONS: "${JAVA_TOOL_OPTIONS:--Xms1024m -Xmx2048m -XX:+UseG1GC}"
       LOG_PATH: ${LOG_PATH:-/app/logs}
-      MYSQL_HOST: mysql
+      
+      # 💡 核心：不再连接本地，直接跨越公网连接你固定的数据库服务器 IP
+      MYSQL_HOST: 124.223.220.245
       MYSQL_PORT: 3306
       MYSQL_DATABASE: ${MYSQL_DATABASE:-astock_business}
       MYSQL_USER: ${MYSQL_USER:-astock}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-pamirs@123}
-      CLICKHOUSE_HOST: clickhouse
+      
+      CLICKHOUSE_HOST: 124.223.220.245
       CLICKHOUSE_HTTP_PORT: 8123
       CLICKHOUSE_DATABASE: ${CLICKHOUSE_DATABASE:-astock_analysis}
       CLICKHOUSE_USER: ${CLICKHOUSE_USER:-default}
       CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-pamirs@123}
+      
       SELENIUM_REMOTE_URL: ${SELENIUM_REMOTE_URL:-http://selenium-chrome:4444/wd/hub}
       THS_PROXY_POOL: ${THS_PROXY_POOL:-149.28.66.23:7890}
       THS_PROXY_PROVIDER_URL: ${THS_PROXY_PROVIDER_URL:-}
@@ -101,8 +54,8 @@
       THS_MIN_USABLE_PROXY_COUNT: ${THS_MIN_USABLE_PROXY_COUNT:-30}
       THS_PROXY_CANDIDATE_LIMIT: ${THS_PROXY_CANDIDATE_LIMIT:-1000}
       THS_PROXY_PROVIDER_PAGE_LIMIT: ${THS_PROXY_PROVIDER_PAGE_LIMIT:-10}
-      THS_PROXY_TEST_URL: ${THS_PROXY_TEST_URL:-http://q.10jqka.com.cn/gn/}
-      THS_PROXY_TEST_URLS: ${THS_PROXY_TEST_URLS:-http://q.10jqka.com.cn/gn/,http://q.10jqka.com.cn/dy/,http://q.10jqka.com.cn/thshy/,http://q.10jqka.com.cn/zjhhy/}
+      THS_PROXY_TEST_URL: ${THS_PROXY_TEST_URL:-http://10jqka.com.cn}
+      THS_PROXY_TEST_URLS: ${THS_PROXY_TEST_URLS:-http://10jqka.com.cn,http://q.10jqka.com.cn/dy/,http://q.10jqka.com.cn/thshy/,http://q.10jqka.com.cn/zjhhy/}
       THS_PROXY_TEST_TIMEOUT_MS: ${THS_PROXY_TEST_TIMEOUT_MS:-1500}
       THS_PROXY_TEST_CONCURRENCY: ${THS_PROXY_TEST_CONCURRENCY:-64}
       THS_PROXY_TEST_CANDIDATE_LIMIT: ${THS_PROXY_TEST_CANDIDATE_LIMIT:-300}
@@ -119,24 +72,17 @@
     volumes:
       - ./logs:/app/logs
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080/health || exit 1"]
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0 || exit 1"]
       interval: 15s
       timeout: 5s
       retries: 20
 
   frontend:
-    build:
-      context: .
-      dockerfile: docker/frontend/Dockerfile
-      args:
-        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-}
+    # 💡 核心：同样拉取云端编译好的专属前端镜像
+    image: crpi-ecp3xwjlx8lx75f1.cn-hangzhou.personal.cr.aliyuncs.com
     container_name: astock-frontend
     restart: unless-stopped
     depends_on:
       - backend
     ports:
       - "${FRONTEND_PORT:-18080}:80"
-
-volumes:
-  astock_mysql_data:
-  astock_clickhouse_data:

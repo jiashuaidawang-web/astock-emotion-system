@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: astock-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-astock_root}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-astock_business}
+      MYSQL_USER: ${MYSQL_USER:-astock}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-pamirs@123}
+      TZ: Asia/Shanghai
+    ports:
+      - "3306:3306" # 💡 暴露到公网，供其他服务器的应用连接
+    command:
+      - --default-authentication-plugin=mysql_native_password
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --max-connections=300
+    volumes:
+      - astock_mysql_data:/var/lib/mysql
+      - ./docker/mysql/conf.d:/etc/mysql/conf.d
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -uroot -p$${MYSQL_ROOT_PASSWORD} --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:23.8
+    container_name: astock-clickhouse
+    restart: unless-stopped
+    environment:
+      CLICKHOUSE_DB: ${CLICKHOUSE_DATABASE:-astock_analysis}
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER:-default}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-pamirs@123}
+      TZ: Asia/Shanghai
+    ports:
+      - "8123:8123" # 💡 暴露 HTTP 端口到公网
+      - "9000:9000" # 💡 暴露 Native 端口到公网
+    volumes:
+      - astock_clickhouse_data:/var/lib/clickhouse
+      - ./docker/clickhouse/config.d/99-enable-http.xml:/etc/clickhouse-server/config.d/99-enable-http.xml:ro
+      - ./docker/clickhouse/users.d/zzzz-force-default-user.xml:/etc/clickhouse-server/users.d/zzzz-force-default-user.xml:ro
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0 | grep -q Ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  astock_mysql_data:
+  astock_clickhouse_data:
