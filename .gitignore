@@ -8,6 +8,8 @@ desktop.ini
 *.iml
 *.ipr
 *.iws
+compiler.xml
+encodings.xml
 
 # Java / Maven generated
 **/target/
