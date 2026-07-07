@@ -32,7 +32,7 @@ jobs:
           context: .
           file: docker/backend/Dockerfile
           push: true
-          tags: ${{ secrets.ALIYUN_REGISTRY }}/astock-backend/astock-backend:latest
+          tags: ${{ secrets.ALIYUN_REGISTRY }}/astock-space/astock-backend:latest
 
       # 4. 自动在云端完成前端代码编译、打包并推送前端镜像
       - name: Build and push Frontend Image
@@ -41,7 +41,7 @@ jobs:
           context: .
           file: docker/frontend/Dockerfile
           push: true
-          tags: ${{ secrets.ALIYUN_REGISTRY }}/astock-backend/astock-frontend:latest
+          tags: ${{ secrets.ALIYUN_REGISTRY }}/astock-space/astock-frontend:latest
 
   # === 阶段 2：通知服务器拉取阿里云新镜像，完成秒级部署 ===
   deploy:

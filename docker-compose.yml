@@ -21,7 +21,7 @@ services:
 
   backend:
     # 💡 核心：拉取你在云端用 GitHub Actions 编译好推送到阿里云的专属成品镜像
-    image: crpi-ecp3xwjlx8lx75f1.cn-hangzhou.personal.cr.aliyuncs.com
+    image: astock-space
     container_name: astock-backend
     restart: unless-stopped
     depends_on:
@@ -79,7 +79,7 @@ services:
 
   frontend:
     # 💡 核心：同样拉取云端编译好的专属前端镜像
-    image: crpi-ecp3xwjlx8lx75f1.cn-hangzhou.personal.cr.aliyuncs.com
+    image: astock-space
     container_name: astock-frontend
     restart: unless-stopped
     depends_on:
